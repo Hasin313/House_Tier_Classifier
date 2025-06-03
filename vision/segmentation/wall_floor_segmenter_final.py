@@ -11,7 +11,7 @@ model = SegformerForSemanticSegmentation.from_pretrained(model_name)
 model.eval()
 
 # ----- Step 2: Load image -----
-image_path = r"C:\Users\hasin\Downloads\SE_HouseImages\9eed1c497936be846d626feb50016448-p_d.jpg"  # change to match your filename
+image_path = r"C:\Users\hasin\OneDrive\Desktop\property_images_final\property_1\image_3.jpg"  # change to match your filename
 image = Image.open(image_path).convert("RGB")
 original_size = image.size  # (W, H)
 
@@ -22,45 +22,62 @@ with torch.no_grad():
     logits = outputs.logits
     predicted = logits.argmax(dim=1)[0].cpu().numpy()
 
+
 # ----- Step 4: Resize segmentation to original size -----
 segmentation_resized = Image.fromarray(predicted.astype(np.uint8)).resize(original_size, resample=Image.NEAREST)
 segmentation = np.array(segmentation_resized)
 
+print("Predicted class IDs:", np.unique(segmentation))
+
 # ----- Step 5: Class IDs -----
-wall_classes = {0}  # wall
-floor_classes = {3}  # floor
+wall_classes = {0}
+floor_classes = {3}
+ceiling_classes = {5}
 
 # ----- Step 6: Create masks -----
 wall_mask = np.isin(segmentation, list(wall_classes)).astype(np.uint8) * 255
 floor_mask = np.isin(segmentation, list(floor_classes)).astype(np.uint8) * 255
+ceiling_mask = np.isin(segmentation, list(ceiling_classes)).astype(np.uint8) * 255
 
 # ----- Step 7: Overlay floor and wall on image -----
 original_np = np.array(image).copy()
 overlay = original_np.copy()
 
-# Apply blue color for floor
+# Apply Blue to Floor
 overlay[floor_mask == 255] = [0, 0, 255]
 
-# Apply red color for wall — note: applied *after* floor so it will appear on top if overlapping
+# Apply Red to Wall
 overlay[wall_mask == 255] = [255, 0, 0]
 
-# Blend original and overlay
+# Apply Green to Ceiling
+overlay[ceiling_mask == 255] = [0, 255, 0]
+
+# Blend
 blended = Image.fromarray((0.5 * original_np + 0.5 * overlay).astype(np.uint8))
 
+
 # ----- Step 8: Show results -----
-fig, axs = plt.subplots(1, 5, figsize=(30, 6))
+fig, axs = plt.subplots(1, 6, figsize=(36, 6))
 axs[0].imshow(image)
 axs[0].set_title("Original Image")
+
 axs[1].imshow(wall_mask, cmap="gray")
 axs[1].set_title("Wall Mask")
+
 axs[2].imshow(floor_mask, cmap="gray")
 axs[2].set_title("Floor Mask")
-axs[3].imshow(overlay)
-axs[3].set_title("Overlay (Pure Colors)")
-axs[4].imshow(blended)
-axs[4].set_title("Blended Overlay (Red=Wall, Blue=Floor)")
+
+axs[3].imshow(ceiling_mask, cmap="gray")
+axs[3].set_title("Ceiling Mask")
+
+axs[4].imshow(overlay)
+axs[4].set_title("Overlay (R=Wall, G=Ceiling, B=Floor)")
+
+axs[5].imshow(blended)
+axs[5].set_title("Blended Overlay")
 
 for ax in axs:
     ax.axis("off")
+
 plt.tight_layout()
 plt.show()

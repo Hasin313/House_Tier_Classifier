@@ -1,21 +1,21 @@
+from pathlib import Path
 import streamlit as st
 import os
 from PIL import Image
 import pandas as pd
-from pathlib import Path
 
-# Set paths
-segmented_floor_path = r"C:\Users\hasin\OneDrive\Desktop\House_Tier_Classifier\data\processed\wall_floor_ceiling_segmented_images\floor"
-original_images_root = r"C:\Users\hasin\OneDrive\Desktop\House_Tier_Classifier\data\raw\property_images_final"
-label_csv_path = r"C:\Users\hasin\OneDrive\Desktop\House_Tier_Classifier\data\labels_floor.csv"
+# BASE_DIR = repo root, assuming script is in utils/
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load or create CSV
-if os.path.exists(label_csv_path):
+segmented_floor_path = BASE_DIR / "data" / "processed" / "wall_floor_ceiling_segmented_images" / "floor"
+original_images_root = BASE_DIR / "data" / "raw" / "property_images_final"
+label_csv_path = BASE_DIR / "data" / "labels_floor.csv"
+
+if label_csv_path.exists():
     label_df = pd.read_csv(label_csv_path)
 else:
     label_df = pd.DataFrame(columns=["image_name", "score", "confidence"])
 
-# Get all segmented floor images
 all_floor_images = sorted([f for f in os.listdir(segmented_floor_path) if f.endswith('.png')])
 
 # Filter already labeled

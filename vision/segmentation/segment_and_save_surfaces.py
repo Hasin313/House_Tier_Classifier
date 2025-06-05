@@ -174,6 +174,9 @@ from pathlib import Path
 import logging
 from wall_floor_ceiling_segmenter_final import segment_image  # Import your segmentation function
 
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -202,7 +205,8 @@ def save_segmented_surfaces(original_image, wall_mask, floor_mask, ceiling_mask,
     # Create surface directories at the base level
     surface_dirs = ['wall', 'floor', 'ceiling']
     for surface_dir in surface_dirs:
-        os.makedirs(os.path.join(output_base_dir, surface_dir), exist_ok=True)
+        # os.makedirs(os.path.join(output_base_dir, surface_dir), exist_ok=True)
+        (output_base_dir / surface_dir).mkdir(parents=True, exist_ok=True)
     
     # Save masked surfaces (only if they have content)
     masks_and_names = [
@@ -218,8 +222,10 @@ def save_segmented_surfaces(original_image, wall_mask, floor_mask, ceiling_mask,
             
             # Create filename: property_X_image_Y_surface.png
             filename = f"{property_name}_{image_name_base}_{surface_name}.png"
-            surface_path = os.path.join(output_base_dir, surface_name, filename)
-            
+            # surface_path = os.path.join(output_base_dir, surface_name, filename)
+
+            surface_path = output_base_dir / surface_name / filename
+
             masked_image.save(surface_path)
             saved_surfaces.append(surface_name)
     
@@ -239,9 +245,8 @@ def get_image_files(directory):
 def process_images():
     """Main processing function"""
 
-    input_dir = r"C:\Users\hasin\OneDrive\Desktop\House_Tier_Classifier\data\raw\property_images_final"
-    output_dir = r"C:\Users\hasin\OneDrive\Desktop\House_Tier_Classifier\data\processed\wall_floor_ceiling_segmented_images"
-
+    input_dir = BASE_DIR / "data" / "raw" / "property_images_final"
+    output_dir = BASE_DIR / "data" / "processed" / "wall_floor_ceiling_segmented_images"
     
     # Check if input directory exists
     if not os.path.exists(input_dir):
@@ -252,13 +257,19 @@ def process_images():
     os.makedirs(output_dir, exist_ok=True)
     
     # Get all property folders
-    property_folders = [f for f in os.listdir(input_dir) 
-                        if os.path.isdir(os.path.join(input_dir, f)) and f.startswith('property_')]
+    # property_folders = [f for f in os.listdir(input_dir) 
+    #                     if os.path.isdir(os.path.join(input_dir, f)) and f.startswith('property_')]
+
+    property_folders = [f for f in input_dir.iterdir() if f.is_dir() and f.name.startswith('property_')]
 
     # Sort them numerically by their ID
+    # property_folders = sorted(
+    #     property_folders,
+    #     key=lambda x: int(x.split('_')[-1]) if x.split('_')[-1].isdigit() else float('inf')
+    # )
     property_folders = sorted(
         property_folders,
-        key=lambda x: int(x.split('_')[-1]) if x.split('_')[-1].isdigit() else float('inf')
+        key=lambda x: int(x.name.split('_')[-1]) if x.name.split('_')[-1].isdigit() else float('inf')
     )
 
     
@@ -273,7 +284,8 @@ def process_images():
     
     # Process each property folder
     for property_folder in property_folders:
-        property_input_dir = os.path.join(input_dir, property_folder)
+        # property_input_dir = os.path.join(input_dir, property_folder)
+        property_input_dir = input_dir / property_folder
         
         logger.info(f"Processing {property_folder}...")
         

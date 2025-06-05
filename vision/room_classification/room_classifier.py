@@ -67,6 +67,8 @@ from transformers import DetrImageProcessor, DetrForObjectDetection
 from PIL import Image, ImageDraw
 import matplotlib.pyplot as plt
 from collections import defaultdict
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # ----- Step 1: Load model and processor -----
 model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
@@ -83,7 +85,7 @@ room_categories = {
 }
 
 # ----- Step 3: Load image -----
-image_path = r"C:\Users\hasin\OneDrive\Desktop\property_images_final\property_1\image_9.jpg"
+image_path = BASE_DIR / "data" / "raw" / "property_images_final" / "property_21" / "image_14.jpg"
 image = Image.open(image_path).convert("RGB")
 
 # ----- Step 4: Run inference -----

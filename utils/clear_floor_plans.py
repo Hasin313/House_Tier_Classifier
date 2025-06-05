@@ -1,6 +1,9 @@
 import os
 from PIL import Image
 import numpy as np
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 def is_floorplan_image(image_path, white_thresh=0.80, edge_thresh=0.005, variance_thresh=30, unique_thresh=20):
     try:
@@ -63,5 +66,5 @@ def run_on_all_properties(root_path):
     print(f"Total floorplan images deleted: {total_deleted}")
 
 # Run the script on your dataset
-root_property_path = r"C:\Users\hasin\OneDrive\Desktop\House_Tier_Classifier\data\raw\property_images_final"
+root_property_path = BASE_DIR / "data" / "raw" / "property_images_final"
 run_on_all_properties(root_property_path)

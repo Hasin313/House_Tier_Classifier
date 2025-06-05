@@ -3,6 +3,9 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 from transformers import SegformerImageProcessor, SegformerForSemanticSegmentation
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ----- Step 1: Load model and processor -----
 model_name = "nvidia/segformer-b0-finetuned-ade-512-512"
@@ -11,7 +14,7 @@ model = SegformerForSemanticSegmentation.from_pretrained(model_name)
 model.eval()
 
 # ----- Step 2: Load image -----
-image_path = r"C:\house hold objects detection model\train\images\Toilet-219-_jpg.rf.385c81b1b143856ac564f7d977254a5b.jpg"
+image_path = r"C:\house hold objects detection model\train\images\Toilet-219-_jpg.rf.385c81b1b143856ac564f7d977254a5b.jpg" #replace with your image path
 image = Image.open(image_path).convert("RGB")
 original_size = image.size  # (W, H)
 
